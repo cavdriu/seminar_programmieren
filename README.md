@@ -9,4 +9,9 @@ Das Projekt ist Teil des Seminars "Angewandte Programmierprojekte" und besteht a
 - Dashboard: [flexdashboard](https://pkgs.rstudio.com/flexdashboard/articles/flexdashboard.html) & [shinydashboard](http://rstudio.github.io/shinydashboard/appearance.html)
 - Anwendung: [shinyapps.io](https://www.shinyapps.io/)
 
+## Meilensteine
+1. Aufbereitung der Daten und Entwicklung einer Datenbank.
+2. Konzept für Dashboard und Entwicklung der App.
+3. ...
+
 
