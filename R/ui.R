@@ -17,7 +17,8 @@ dashboardPage(
         
         sidebarMenu(#id = "sidebar",
             menuItem("Item 1", tabName = "item_1", icon = icon("birthday-cake")),
-            menuItem("Item 2", tabName = "item_2", icon = icon("birthday-cake"))
+            menuItem("Item 2", tabName = "item_2", icon = icon("birthday-cake")),
+            dateRangeInput("year", "Jahre:", format = "yyyy")
             )
         ),
     dashboardBody(
