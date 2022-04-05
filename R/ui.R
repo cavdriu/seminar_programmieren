@@ -4,13 +4,15 @@
 # source: https://shiny.rstudio.com/
 # source: https://rstudio.github.io/shinydashboard/
 
-#########
-# setup #
-#########
+
+# setup -------------------------------------------------------------------
+
 library(shiny)
 library(shinydashboard)
 
-###
+
+# ui ----------------------------------------------------------------------
+
 dashboardPage(
     dashboardHeader(title = "Empty App"),
     dashboardSidebar(

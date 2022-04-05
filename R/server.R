@@ -5,12 +5,13 @@
 # source: https://rstudio.github.io/shinydashboard/
 
 
-#########
-# setup #
-#########
+# setup -------------------------------------------------------------------
+
 library(shiny)
 
-###
+
+# server ------------------------------------------------------------------
+
 shinyServer(function(input, output){
     
     output$dist <- renderPlot({
