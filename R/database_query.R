@@ -5,20 +5,21 @@
 # source: https://db.rstudio.com/r-packages/dplyr/
 
 
-#########
-# setup #
-#########
+
+# setup -------------------------------------------------------------------
+
 library(RSQLite)
 library(DBI)
 library(here)
+
+
+# select date -------------------------------------------------------------
 
 ### connect to db
 db <- dbConnect(drv = SQLite(), dbname = here("data", "social_security.db"))
 dbListTables(db)
 
-###############
-# select date #
-###############
+## readTable into R
 socsec <- dbReadTable(db, "socsec")
 socsec_dedu <- dbReadTable(db, "socsec_deduction")
 socsec_rate <- dbReadTable(db, "socsec_rate")
