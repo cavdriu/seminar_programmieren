@@ -27,7 +27,8 @@ glimpse(socsec)
 socsec <- socsec %>% 
   rename_with(tolower) %>% 
   rename(year = ï..period, service = component, unit = unit_measure) %>% 
-  mutate(unit_measure = if_else(unit == "%", "perc", unit))
+  mutate(unit = if_else(unit == "%", "perc", unit),
+         value = round(as.numeric(value), digits = 0))
 
 ### socsec_deduction
 glimpse(socsec_dedu)
@@ -73,7 +74,7 @@ socsec_remain <- socsec_remain %>%
 
 db <- dbConnect(drv = SQLite(), dbname = here("data", "social_security.db"))
 
-dbWriteTable(conn = db, name = "socsec", value = socsec)
+dbWriteTable(conn = db, name = "socsec", value = socsec) #overwrite = TRUE
 dbWriteTable(conn = db, name = "socsec_remain", value = socsec_remain)
 dbWriteTable(conn = db, name = "socsec_rate", value = socsec_rate)
 dbWriteTable(conn = db, name = "socsec_dedu", value = socsec_dedu)
