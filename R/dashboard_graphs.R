@@ -2,6 +2,9 @@
 ### dashboard graphs ###
 ########################
 # source: https://clauswilke.com/dataviz/
+# source: https://blog.datawrapper.de/colors-for-data-vis-style-guides/
+# source: https://r-graphics.org/
+# source: https://github.com/emitanaka/wearerladies/blob/master/day3.md
 
 # setup -------------------------------------------------------------------
 
@@ -100,28 +103,50 @@ data_socsec_dodge_bplot %>%
 
 # plots: ueber zeit gruppen (gender/alter) --------------------------------------------------------
 
-# >> daten nochmals überdenken (normalisieren? total rausbringen?)
+# die kategorien gender, pop_group und age sind nur im verhältniss zu service gruppiert
+# untereinander stehen sie nicht im verhältnis
 
 ## data
 glimpse(socsec_rate)
 
 data_socsec_rate <- socsec_rate %>% 
   mutate(year = as.character(year)) %>% 
-  filter(unit == "n",
-         gender != "Total"
-         #service != "Total"
-         )
+  filter(unit == "n")#,
+         #service != "Total")
 
-data_socsec_rate_total <- data_socsec_rate %>% 
-  filter(service == "Total", gender == "Total", pop_group == "Total", age == "Total")
+data_socsec_gender <- data_socsec_rate %>% 
+  filter(pop_group == "Total" & age == "Total")
 
-## plot
-data_socsec_rate %>% 
-  ggplot(aes(x = age, y = value, fill = gender)) +
-  geom_col() + 
-  facet_wrap(~service)
+data_socsec_pop <- data_socsec_rate %>% 
+  filter(gender == "Total" & age == "Total")
 
+data_socsec_age <- data_socsec_rate %>% 
+  filter(gender == "Total" & pop_group == "Total") %>% 
+  select(-c(gender:pop_group, unit))
 
+## plot male vs. female
+data_socsec_gender %>% 
+  filter(gender != "Total" & service != "Total") %>% 
+  ggplot(aes(x = year, y = value, fill = gender)) +
+  geom_col(position = "fill") + 
+  geom_hline(aes(yintercept = 0.5), linetype = "dotted") +
+  scale_fill_brewer(palette = "Dark2") +
+  facet_wrap(~service) +
+  theme(
+    legend.position="none",
+    plot.title = element_text(size = 14)) +
+  theme_minimal()
+  
+## plot grouped by age
+data_socsec_age %>%
+  filter(age != "Total" & service != "Total", service == "ALV") %>% 
+  #filter(service == "ALV") %>% 
+  ggplot(aes(x = year, y = value, fill = age, color = age)) +
+  geom_area(data = ~select(., -age), aes(x = year, y = value), fill = "grey", color = "grey") + 
+  #geom_col(data = ~select(., -service), fill = "grey") +        # ~ vor select ist notwendig um mit . den datensatz nochmals abzurufen
+  #geom_col(position = "stack") +
+  geom_area() +
+  facet_wrap(~age)
 
 
 # 
@@ -158,7 +183,7 @@ data_socsec_rate %>%
 ## data
 glimpse(socsec_dedu)
 
-data_socsec_dedu <- socsec_dedu %>% 
+-data_socsec_dedu <- socsec_dedu %>% 
   mutate(year = as.character(year)) %>% 
   filter(unit == "n")#,
          #service %in% c("ALV", "IV", "SH"))
