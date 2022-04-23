@@ -9,6 +9,7 @@
 # setup -------------------------------------------------------------------
 
 library(dplyr)
+library(tidyr)
 library(ggplot2)
 library(scales)
 
@@ -37,7 +38,7 @@ data_socsec_last <- socsec %>%
 
 ## plot
 data_socsec %>% 
-  ggplot(aes(x = year, y = value, group = service, color = service)) +
+ggplot(aes(x = year, y = value, group = service, color = service)) +
   geom_line() +
   scale_x_discrete(
     expand = c(0, 0)
@@ -66,7 +67,7 @@ data_socsec_stack_bplot$service <- factor(data_socsec_stack_bplot$service,
                                   levels = c("ALV", "IV", "SH", "ALV+IV", "ALV+SH", "SH+IV", "ALV+SH+IV"))
 ## plot
 data_socsec_stack_bplot %>% 
-  ggplot(aes(x = year, y = value, fill = service)) + 
+ggplot(aes(x = year, y = value, fill = service)) + 
   geom_col(position = "fill") +
   scale_fill_brewer(palette = "Dark2"#,
                     #limits = c("ALV", "IV", "SH", "ALV+IV", "ALV+SH", "SH+IV", "ALV+SH+IV")
@@ -84,7 +85,7 @@ data_socsec_dodge_bplot$service <- factor(data_socsec_dodge_bplot$service,
                                           levels = c("ALV+SH+IV", "ALV+IV", "SH+IV", "ALV+SH", "SH", "IV", "ALV"))
 ## plot
 data_socsec_dodge_bplot %>% 
-  ggplot(aes(x = year, y = value, fill = service)) + 
+ggplot(aes(x = year, y = value, fill = service)) + 
   geom_col(position = "dodge") +
   scale_y_continuous(
     #limits = c(0, max(data_socsec_d$value) + 20000),
@@ -113,21 +114,37 @@ data_socsec_rate <- socsec_rate %>%
   mutate(year = as.character(year)) %>% 
   filter(unit == "n")#,
          #service != "Total")
-
+# gender
 data_socsec_gender <- data_socsec_rate %>% 
   filter(pop_group == "Total" & age == "Total")
 
+# pop
 data_socsec_pop <- data_socsec_rate %>% 
   filter(gender == "Total" & age == "Total")
 
+# age
 data_socsec_age <- data_socsec_rate %>% 
   filter(gender == "Total" & pop_group == "Total") %>% 
   select(-c(gender:pop_group, unit))
 
+data_socsec_age_total <- data_socsec_age %>%
+  mutate(value_total = if_else(age == "Total",
+                               value,
+                               1)) %>%
+  select(-value) %>% 
+  pivot_wider(names_from = age,
+              values_from = value_total) %>% 
+  mutate("18-24" = Total, "25-39" = Total, "40-54" = Total, "55-65" = Total) %>%  # einfacherer weg möglich? zb. across()
+  pivot_longer(!year:service,
+               names_to = "age",
+               values_to = "value_total")
+
+data_socsec_age <- left_join(data_socsec_age, data_socsec_age_total)
+
 ## plot male vs. female
 data_socsec_gender %>% 
   filter(gender != "Total" & service != "Total") %>% 
-  ggplot(aes(x = year, y = value, fill = gender)) +
+ggplot(aes(x = year, y = value, fill = gender)) +
   geom_col(position = "fill") + 
   geom_hline(aes(yintercept = 0.5), linetype = "dotted") +
   scale_fill_brewer(palette = "Dark2") +
@@ -138,41 +155,43 @@ data_socsec_gender %>%
   theme_minimal()
   
 ## plot grouped by age
+###wieso ist as.numeric() notwendig ???###
 data_socsec_age %>%
-  filter(age != "Total" & service != "Total", service == "ALV") %>% 
-  #filter(service == "ALV") %>% 
-  ggplot(aes(x = year, y = value, fill = age, color = age)) +
-  geom_area(data = ~select(., -age), aes(x = year, y = value), fill = "grey", color = "grey") + 
-  #geom_col(data = ~select(., -service), fill = "grey") +        # ~ vor select ist notwendig um mit . den datensatz nochmals abzurufen
-  #geom_col(position = "stack") +
+  filter(age != "Total" & service != "Total", service == "ALV") %>% # service anpassen
+  mutate(age = paste0("Age: ", .$age)) %>% 
+ggplot(aes(x = as.numeric(year), y = value, fill = age)) +
+  geom_area(aes(x = as.numeric(year), y = value_total), fill = "grey",  alpha = 0.8, color = "grey") + 
   geom_area() +
-  facet_wrap(~age)
+  geom_line(color = "black") +
+  scale_fill_brewer(palette = "Dark2") +
+  scale_y_continuous(
+    labels = number,
+    expand = c(0, 0)
+  ) +
+  facet_wrap(~age) +
+  theme(
+    legend.position="none",
+    plot.title = element_text(size = 14)) +
+  theme_minimal()
 
-
-# 
-# ggplot(mutate(df_health, health = fct_rev(health)), aes(x = age, y = ..count..)) +
-#   geom_density_line(data = select(df_health, -health), aes(fill = "all people surveyed   "), color = "transparent") +
-#   geom_density_line(aes(fill = "highlighted group"), color = "transparent") +
-#   facet_wrap(~health, nrow = 1) +
-#   scale_x_continuous(name = "age (years)", limits = c(15, 98), expand = c(0, 0)) +
-#   scale_y_continuous(name = "count", expand = c(0, 0)) +
-#   scale_fill_manual(
-#     values = c("#b3b3b3a0", "#2b8cbed0"),
-#     name = NULL,
-#     guide = guide_legend(direction = "horizontal")
-#   ) +
-#   coord_cartesian(clip = "off") +
-#   theme_dviz_hgrid() +
+# vergleich zu stacked
+# data_socsec_age %>%
+#   filter(age != "Total" & service != "Total", service == "ALV") %>% 
+#   ggplot(aes(x = as.numeric(year), y = value, fill = age)) +
+#   geom_area() +
+#   scale_fill_brewer(palette = "Dark2") +
 #   theme(
-#     axis.line.x = element_blank(),
-#     strip.text = element_text(size = 14, margin = margin(0, 0, 0.2, 0, "cm")),
-#     legend.position = "bottom",
-#     legend.justification = "right",
-#     legend.margin = margin(4.5, 0, 1.5, 0, "pt"),
-#     legend.spacing.x = grid::unit(4.5, "pt"),
-#     legend.spacing.y = grid::unit(0, "pt"),
-#     legend.box.spacing = grid::unit(0, "cm")
-#   )
+#     legend.position="none",
+#     plot.title = element_text(size = 14)) +
+#   theme_minimal()
+
+
+
+
+
+
+
+
 
 
 
