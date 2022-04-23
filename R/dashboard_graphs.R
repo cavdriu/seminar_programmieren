@@ -38,6 +38,7 @@ data_socsec_last <- socsec %>%
 
 ## plot
 data_socsec %>% 
+  filter(service != "Total") %>% 
 ggplot(aes(x = year, y = value, group = service, color = service)) +
   geom_line() +
   scale_x_discrete(
@@ -53,11 +54,11 @@ ggplot(aes(x = year, y = value, group = service, color = service)) +
       name = NULL)
     ) +
   scale_color_brewer(palette = "Dark2") +
+  theme_minimal() +
   theme(
     legend.position="none",
-    plot.title = element_text(size=14)) +
-  guides(group = "none", color = "none") +
-  theme_minimal()
+    plot.title = element_text(size=14))
+
 
 ### relativ:  stacket barplot
 
@@ -72,10 +73,10 @@ ggplot(aes(x = year, y = value, fill = service)) +
   scale_fill_brewer(palette = "Dark2"#,
                     #limits = c("ALV", "IV", "SH", "ALV+IV", "ALV+SH", "SH+IV", "ALV+SH+IV")
                     ) +
+  theme_minimal() +
   theme(
-    legend.position="none",
-    plot.title = element_text(size=14)) +
-  theme_minimal()
+    #legend.position="none",
+    plot.title = element_text(size=14))
 
 ### relativ: dodge barplot
 
@@ -95,10 +96,10 @@ ggplot(aes(x = year, y = value, fill = service)) +
   scale_fill_brewer(palette = "Dark2"#,
                     #limits = c("ALV", "IV", "SH")
                     ) +
+  theme_minimal() +
   theme(
-    legend.position="none",
-    plot.title = element_text(size = 14)) +
-  theme_minimal()
+    #legend.position="none",
+    plot.title = element_text(size = 14)) 
 
 
 
@@ -149,12 +150,13 @@ ggplot(aes(x = year, y = value, fill = gender)) +
   geom_hline(aes(yintercept = 0.5), linetype = "dotted") +
   scale_fill_brewer(palette = "Dark2") +
   facet_wrap(~service) +
+  theme_minimal() +
   theme(
-    legend.position="none",
-    plot.title = element_text(size = 14)) +
-  theme_minimal()
+    legend.position = "none",
+    plot.title = element_text(size = 14))
   
 ## plot grouped by age
+
 ###wieso ist as.numeric() notwendig ???###
 data_socsec_age %>%
   filter(age != "Total" & service != "Total", service == "ALV") %>% # service anpassen
@@ -169,31 +171,21 @@ ggplot(aes(x = as.numeric(year), y = value, fill = age)) +
     expand = c(0, 0)
   ) +
   facet_wrap(~age) +
+  theme_minimal() +
   theme(
     legend.position="none",
-    plot.title = element_text(size = 14)) +
-  theme_minimal()
+    plot.title = element_text(size = 14))
 
-# vergleich zu stacked
+# # vergleich zu stacked
 # data_socsec_age %>%
-#   filter(age != "Total" & service != "Total", service == "ALV") %>% 
+#   filter(age != "Total" & service != "Total", service == "ALV") %>%
 #   ggplot(aes(x = as.numeric(year), y = value, fill = age)) +
 #   geom_area() +
 #   scale_fill_brewer(palette = "Dark2") +
+#   theme_minimal() +
 #   theme(
 #     legend.position="none",
-#     plot.title = element_text(size = 14)) +
-#   theme_minimal()
-
-
-
-
-
-
-
-
-
-
+#     plot.title = element_text(size = 14))
 
 
 # plots: ueber zeit und gruppen (gender/alter) ???--------------------------------------------------------------
