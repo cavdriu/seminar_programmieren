@@ -9,18 +9,32 @@ ggplot(olives, aes(palmitoleic, palmitic, color = Area)) +
   guides(color = "none") +
   labs(tag = "(C)")
 
-View(data_socsec_age)
 
-test <- data_socsec_age %>%
-  filter(age != "Total" & service != "Total", service == "ALV")
+paste0("Age ", data_socsec_age$age)
+# -------------------------------------------------------------------------
 
-glimpse(test)
-#https://r-graphics.org/recipe-line-graph-area
-ggplot(test, aes(x = as.numeric(year), y = value, fill = age)) + # wieso ist as.numeric notwendig?
-  geom_area(data = ~select(., -age), fill = "grey", color = "grey", group = "grey") +
-  geom_area() +
-  facet_wrap(~age)
+# 
+# ggplot(mutate(df_health, health = fct_rev(health)), aes(x = age, y = ..count..)) +
+#   geom_density_line(data = select(df_health, -health), aes(fill = "all people surveyed   "), color = "transparent") +
+#   geom_density_line(aes(fill = "highlighted group"), color = "transparent") +
+#   facet_wrap(~health, nrow = 1) +
+#   scale_x_continuous(name = "age (years)", limits = c(15, 98), expand = c(0, 0)) +
+#   scale_y_continuous(name = "count", expand = c(0, 0)) +
+#   scale_fill_manual(
+#     values = c("#b3b3b3a0", "#2b8cbed0"),
+#     name = NULL,
+#     guide = guide_legend(direction = "horizontal")
+#   ) +
+#   coord_cartesian(clip = "off") +
+#   theme_dviz_hgrid() +
+#   theme(
+#     axis.line.x = element_blank(),
+#     strip.text = element_text(size = 14, margin = margin(0, 0, 0.2, 0, "cm")),
+#     legend.position = "bottom",
+#     legend.justification = "right",
+#     legend.margin = margin(4.5, 0, 1.5, 0, "pt"),
+#     legend.spacing.x = grid::unit(4.5, "pt"),
+#     legend.spacing.y = grid::unit(0, "pt"),
+#     legend.box.spacing = grid::unit(0, "cm")
+#   )
 
-test %>% 
-  ggplot(aes(x = year, y = value, fill)) + 
-  geom_area()
