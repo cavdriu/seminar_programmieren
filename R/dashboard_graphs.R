@@ -59,6 +59,28 @@ ggplot(aes(x = year, y = value, group = service, color = service)) +
     legend.position="none",
     plot.title = element_text(size=14))
 
+### absolut: dodge barplot
+
+## data
+data_socsec_dodge_bplot <- data_socsec %>% filter(service != "Total")
+data_socsec_dodge_bplot$service <- factor(data_socsec_dodge_bplot$service, 
+                                          levels = c("ALV+SH+IV", "ALV+IV", "SH+IV", "ALV+SH", "SH", "IV", "ALV"))
+## plot
+data_socsec_dodge_bplot %>% 
+  ggplot(aes(x = year, y = value, fill = service)) + 
+  geom_col(position = "dodge") +
+  scale_y_continuous(
+    #limits = c(0, max(data_socsec_d$value) + 20000),
+    labels = number,
+    expand = c(0, 0)
+  ) +
+  scale_fill_brewer(palette = "Dark2"#,
+                    #limits = c("ALV", "IV", "SH")
+  ) +
+  theme_minimal() +
+  theme(
+    #legend.position="none",
+    plot.title = element_text(size = 14)) 
 
 ### relativ:  stacket barplot
 
@@ -78,30 +100,6 @@ ggplot(aes(x = year, y = value, fill = service)) +
     #legend.position="none",
     plot.title = element_text(size=14))
 
-### relativ: dodge barplot
-
-## data
-data_socsec_dodge_bplot <- data_socsec %>% filter(service != "Total")
-data_socsec_dodge_bplot$service <- factor(data_socsec_dodge_bplot$service, 
-                                          levels = c("ALV+SH+IV", "ALV+IV", "SH+IV", "ALV+SH", "SH", "IV", "ALV"))
-## plot
-data_socsec_dodge_bplot %>% 
-ggplot(aes(x = year, y = value, fill = service)) + 
-  geom_col(position = "dodge") +
-  scale_y_continuous(
-    #limits = c(0, max(data_socsec_d$value) + 20000),
-    labels = number,
-    expand = c(0, 0)
-  ) +
-  scale_fill_brewer(palette = "Dark2"#,
-                    #limits = c("ALV", "IV", "SH")
-                    ) +
-  theme_minimal() +
-  theme(
-    #legend.position="none",
-    plot.title = element_text(size = 14)) 
-
-
 
 # plots: ueber zeit gruppen (gender/alter) --------------------------------------------------------
 
@@ -117,11 +115,17 @@ data_socsec_rate <- socsec_rate %>%
          #service != "Total")
 # gender
 data_socsec_gender <- data_socsec_rate %>% 
-  filter(pop_group == "Total" & age == "Total")
+  filter(pop_group == "Total" & age == "Total" & gender != "Total") %>% 
+  select(!c("pop_group","age"))
 
 # pop
 data_socsec_pop <- data_socsec_rate %>% 
-  filter(gender == "Total" & age == "Total")
+  filter(gender == "Total" & age == "Total" & pop_group != "Total") %>% 
+  pivot_wider(names_from = pop_group, values_from = value) %>%
+  rename_with(tolower) %>% 
+  mutate(diff = ch - ausl) %>% 
+  pivot_longer(cols = c(ch, ausl), names_to = "pop_group", values_to = "value") %>% 
+  select(!c("gender","age"))
 
 # age
 data_socsec_age <- data_socsec_rate %>% 
@@ -142,7 +146,7 @@ data_socsec_age_total <- data_socsec_age %>%
 
 data_socsec_age <- left_join(data_socsec_age, data_socsec_age_total)
 
-## plot male vs. female
+## plot male vs. female (overview)
 data_socsec_gender %>% 
   filter(gender != "Total" & service != "Total") %>% 
 ggplot(aes(x = year, y = value, fill = gender)) +
@@ -154,6 +158,46 @@ ggplot(aes(x = year, y = value, fill = gender)) +
   theme(
     legend.position = "none",
     plot.title = element_text(size = 14))
+
+## zooming
+# https://r-graph-gallery.com/web-extended-dumbbell-plot-ggplot2.html
+# https://r-graph-gallery.com/web-lollipop-plot-with-r-mario-kart-64-world-records.html
+data_socsec_m <- filter(data_socsec_gender, gender == "M") %>% 
+  filter(service == "Total")
+data_socsec_f <- filter(data_socsec_gender, gender == "F") %>% 
+  filter(service == "Total")
+
+data_socsec_gender %>% 
+  filter(service == "Total") %>% 
+ggplot() +
+  geom_segment(data = data_socsec_m,
+               aes(x = value, y = year,
+                   xend = data_socsec_f$value, yend = data_socsec_f$year),
+               color = "#aeb6bf",
+               size = 4.5, # segment muss zu den punkten passen
+               alpha = 0.5) +
+  geom_point(aes(x = value, y = year, color = gender), 
+             size = 4)
+  #facet_wrap(~service)
+
+## plot population group (origin)
+# # dito gender
+# data_socsec_ch <- filter(data_socsec_pop, pop_group == "ch") %>% 
+#   filter(service == "Total")
+# data_socsec_ausl <- filter(data_socsec_pop, pop_group == "ausl") %>% 
+#   filter(service == "Total")
+# 
+# data_socsec_pop %>% 
+#   filter(service == "Total") %>% 
+#   ggplot() +
+#   geom_segment(data = data_socsec_ch,
+#                aes(x = value, y = year,
+#                    xend = data_socsec_ausl$value, yend = data_socsec_ausl$year),
+#                color = "#aeb6bf",
+#                size = 4.5, # segment muss zu den punkten passen
+#                alpha = 0.5) +
+#   geom_point(aes(x = value, y = year, color = pop_group), 
+#              size = 4)
   
 ## plot grouped by age
 
@@ -186,6 +230,8 @@ ggplot(aes(x = as.numeric(year), y = value, fill = age)) +
 #   theme(
 #     legend.position="none",
 #     plot.title = element_text(size = 14))
+
+
 
 
 # plots: ueber zeit und gruppen (gender/alter) ???--------------------------------------------------------------
