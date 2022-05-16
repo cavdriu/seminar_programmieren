@@ -45,8 +45,8 @@ ggplot(aes(x = year, y = value, group = service, color = service)) +
   ) +
   scale_y_continuous(
     #limits = c(0, max(data_socsec$value) + 2000),
-    #breaks = scales::pretty_breaks(),
-    labels = number,
+    breaks = scales::pretty_breaks(),
+    labels = scales::number,
     #expand = c(0, 0),
     sec.axis = dup_axis(
       breaks = data_socsec_last$value,
@@ -70,7 +70,8 @@ data_socsec_dodge_bplot %>%
   ggplot(aes(x = year, y = value, fill = service)) + 
   geom_col(position = "dodge") +
   scale_y_continuous(
-    labels = number
+    breaks = scales::pretty_breaks(),
+    labels = scales::number
   ) +
   scale_fill_brewer(palette = "Dark2"#,
                     #limits = c("ALV", "IV", "SH")
