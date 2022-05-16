@@ -176,7 +176,7 @@ plot_gender_zooming <- function(data, years, services) {
   # color points
   scale_color_manual(values = c("#1B9E77","#D95F02")) +
   geom_text(data = list$diff_gender,
-            aes(label = paste("n = ", diff_a, "  /  ", diff_r, "%", sep = ""), x = x_pos, y = year),
+            aes(label = paste("Diff. = ", diff_a, "  /  ", diff_r, "%", sep = ""), x = x_pos, y = year),
             color = "#4a4e4d",
             angle = 90,
             size = 2.5) +
