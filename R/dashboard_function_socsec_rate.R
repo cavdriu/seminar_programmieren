@@ -12,7 +12,7 @@ library(dplyr)
 library(tidyr)
 library(ggplot2)
 
-# plots: ueber zeit gruppen (gender/alter) --------------------------------------------------------
+# data --------------------------------------------------------
 
 # die kategorien gender, pop_group und age sind nur im verhältniss zu service gruppiert
 # untereinander stehen sie nicht im verhältnis
@@ -76,17 +76,18 @@ data_socsec_age <- left_join(data_socsec_age, data_socsec_age_total)
 # gender ------------------------------------------------------------------
 
 ## overview ratio
-plot_gender_overview_ratio <- function(data, years, services) {
+plot_gender_overview_ratio <- function(data, year1, year2, services) {  #year!!!
   data %>% 
-    filter(gender != "Total" & service != "Total") %>% 
-    filter(year %in% years, service %in% services) %>% 
+    filter(gender != "Total") %>% 
+    filter(year %in% c(year1:year2), service %in% services) %>% 
   ggplot(aes(x = year, y = value, fill = gender)) +
-    geom_col(position = "fill") + 
-    geom_hline(aes(yintercept = 0.5), linetype = "dotted") +
+    geom_col(position = "fill") +
+    scale_fill_manual(values = c("#1B9E77","#D95F02")) +
     scale_x_continuous(breaks = c(1900:2200)) +
-    scale_y_continuous(expand = c(0, 0)) +
-    scale_fill_brewer(palette = "Dark2") +
-    facet_wrap(~service) +
+    scale_y_continuous(expand = c(0, 0),
+                       labels = scales::percent_format()) +
+    geom_hline(yintercept = 0.5, linetype = "dotted") +
+    #facet_wrap(~service) +
     theme_minimal() +
     theme(
       axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1),
@@ -94,20 +95,23 @@ plot_gender_overview_ratio <- function(data, years, services) {
 }
 
 # test
-plot_gender_overview_ratio(data_socsec_gender, 2010:2019, c("IV"))
+plot_gender_overview_ratio(data_socsec_gender, 2010, 2019, c("ALV"))
 
 ## overview absolute
-plot_gender_overview_absolute <- function(data, years, services) {
+plot_gender_overview_absolute <- function(data, year1, year2, services) {
   data %>% 
-    filter(gender != "Total" & service != "Total") %>% 
-    filter(year %in% years, service %in% services) %>% 
+    filter(gender != "Total") %>% 
+    filter(year %in% c(year1:year2), service %in% services) %>% 
     ggplot(aes(x = year, y = value, fill = gender)) +
     geom_col() + 
-    geom_hline(aes(yintercept = mean(value)), linetype = "dotted") + #funktioniert das immer?
+    scale_fill_manual(values = c("#1B9E77","#D95F02")) +
     scale_x_continuous(breaks = c(1900:2200)) +
-    scale_y_continuous(expand = c(0, 0)) +
-    scale_fill_brewer(palette = "Dark2") +
-    facet_wrap(~service) +
+    scale_y_continuous(expand = c(0, 0),
+                       labels = scales::label_number()) +
+    # geom_hline(aes(yintercept = mean(value)), linetype = "dotted") + #funktioniert das immer?
+    # geom_text(aes(x = max(year) + 0.5, y = mean(value)),
+    #           label = "MEAN", angle = 90, size = 3.5, color = "#000000") +
+    # facet_wrap(~service) +
     theme_minimal() +
     theme(
       axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1),
@@ -115,19 +119,19 @@ plot_gender_overview_absolute <- function(data, years, services) {
 }
 
 # test
-plot_gender_overview_absolute(data_socsec_gender, 2010:2019, c("IV"))
+plot_gender_overview_absolute(data_socsec_gender, 2010, 2019, c("Total"))
 
 
 ## zooming in
 # https://r-graph-gallery.com/web-extended-dumbbell-plot-ggplot2.html
 # https://r-graph-gallery.com/web-lollipop-plot-with-r-mario-kart-64-world-records.html
 
-plot_gender_zooming <- function(data, years, services) {
+plot_gender_zoomin <- function(data, year1, year2, services) {
   
   ## data for plot
   list <- list()
   list$data_plot <- data %>% 
-    filter(year %in% years, service %in% services) 
+    filter(year %in% c(year1:year2), service %in% services) 
    
   ## stat for plot
   list$stats_gender <- list$data_plot %>% 
@@ -212,7 +216,7 @@ plot_gender_zooming <- function(data, years, services) {
 }
 
 #test
-plot_gender_zooming(data_socsec_gender, 2010:2019, "IV")
+plot_gender_zoomin(data_socsec_gender, 2010, 2019, "Total")
 
 
 # population --------------------------------------------------------------

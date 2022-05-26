@@ -13,21 +13,28 @@ library(shinydashboard)
 
 # ui ----------------------------------------------------------------------
 
-dashboardPage(
-    dashboardHeader(title = "Empty App"),
-    dashboardSidebar(
+header <- dashboardHeader(title = "Sozialversicherungen Schweiz")
+
+# inputs (im server integrieren?)
+service <- c("Total", "ALV", "IV", "SH")
+gender <- c("f", "m")
+
+sidebar <- dashboardSidebar(
         
-        sidebarMenu(#id = "sidebar",
-            menuItem("Item 1", tabName = "item_1", icon = icon("birthday-cake")),
-            menuItem("Item 2", tabName = "item_2", icon = icon("birthday-cake")),
-            dateRangeInput("year", "Jahre:", format = "yyyy")
+        sidebarMenu(id = "sidebar",
+            menuItem("Übersicht", tabName = "overview", icon = icon("overview")),
+            menuItem("Geschlecht", tabName = "gender", icon = icon("gender")),
+            selectInput("service", "Auwahl der Sozialversicherung", service),
+            numericInput("start", "Von", value = 2010, min = 2010, max = 2019),
+            numericInput("end", "Bis", value = 2019, min = 2010, max = 2019)
             )
-        ),
-    dashboardBody(
+        )
+
+body <- dashboardBody(
         
         tabItems(
-            tabItem(tabName = "item_1",
-                h2("Dashboard 1"),
+            tabItem(tabName = "overview",
+                h2("Übersicht der Sozialversicherungen"),
                 
                 fluidPage(
                     
@@ -55,19 +62,39 @@ dashboardPage(
                     )
                 ),
                 
-            tabItem(tabName = "item_2",
+            tabItem(tabName = "gender",
                     
-                    h2("Dashboard 2"),
+                    h2("Sozialversicherungen nach Geschlecht"),
                     
                     fluidPage(
                         
                         fluidRow(
-                            box("Tabelle",
-                                dataTableOutput("tab"),
+                            # box(title = NULL,
+                            #     checkboxGroupInput("gender", "Auswahl Geschlecht", gender)),
+                            
+                            box(title = "Überblick Verhältniss",
+                                plotOutput("gender_ratio"),
+                                width = 6),
+                            
+                            box(title = "Überblick Absolut",
+                                plotOutput("gender_absolut"),
+                                width = 6)
+                            
+                            # box(title,
+                            #     dataTableOutput("tab"),
+                            #     width = 12)
+                            ),
+                        
+                        fluidRow(
+                            
+                            box(title = "Zoom-In",
+                                plotOutput("gender_zoomin"),
                                 width = 12)
-                            )
+                        )
                         )
                     )
             )
         )
-    )
+
+
+dashboardPage(header, sidebar, body)
