@@ -33,15 +33,6 @@ data_socsec_gender <- data_socsec_rate %>%
   pivot_longer(cols = c(m, f), names_to = "gender", values_to = "value") %>% 
   select(!c("pop_group","age")) 
 
-# stats_gender <- data_socsec_gender %>% 
-#   group_by(gender, service) %>% 
-#   summarize(mean = mean(value),
-#             se = sd(value)) %>% 
-#   mutate(mean_pos = mean + (1 * se),
-#          mean_neg = mean - (1 * se)) %>% 
-#   ungroup()
-
-
 # pop
 data_socsec_pop <- data_socsec_rate %>% 
   filter(gender == "Total" & age == "Total" & pop_group != "Total") %>% 
@@ -196,12 +187,15 @@ plot_gender_zoomin <- function(data, year1, year2, services) {
                      labels = list$data_plot$year,
                      expand = c(0, 0)) +
     
+  scale_x_continuous(labels = scales::label_number()) +
+    
   coord_flip() +
 
   # layout
   theme(axis.ticks.y = element_line(color = "#e3e2e2"),
         axis.ticks.x = element_line(color = "#e3e2e2"),
         axis.line.x = element_blank(),
+        axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1),
         text = element_text(color = "#4a4e4d"),
         strip.text.y.left  = element_text(angle = 0),
         panel.background = element_rect(fill = "white", color = "white"),
@@ -216,17 +210,75 @@ plot_gender_zoomin <- function(data, year1, year2, services) {
 }
 
 #test
-plot_gender_zoomin(data_socsec_gender, 2010, 2019, "Total")
+plot_gender_zoomin(data_socsec_gender, 2010, 2019, c("Total"))
+
+## data table
+
+data_data_table_gender <- select(data_socsec_gender, !c("diff_a", "diff_r"))
+
+data_table_gender <- function(year1, year2, services){
+  
+  filter(data_data_table_gender, year %in% c(year1:year2) & service %in% services)
+  
+}
+
+#test 
+data_table_gender(2010, 2019, c("Total"))
 
 
 # population --------------------------------------------------------------
 
-plot_pop_zooming <- function(data, years, services) {
+## overview ratio
+plot_pop_overview_ratio <- function(data, year1, year2, services) {  #year!!!
+  data %>% 
+    filter(year %in% c(year1:year2), service %in% services) %>% 
+    ggplot(aes(x = year, y = value, fill = pop_group)) +
+    geom_col(position = "fill") +
+    scale_fill_manual(values = c("#1B9E77","#D95F02")) +
+    scale_x_continuous(breaks = c(1900:2200)) +
+    scale_y_continuous(expand = c(0, 0),
+                       labels = scales::percent_format()) +
+    geom_hline(yintercept = 0.5, linetype = "dotted") +
+    #facet_wrap(~service) +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1),
+      plot.title = element_text(size = 14))
+}
+
+# test
+plot_pop_overview_ratio(data_socsec_pop, 2010, 2019, c("ALV"))
+
+## overview absolute
+plot_pop_overview_absolute <- function(data, year1, year2, services) {
+  data %>% 
+    filter(year %in% c(year1:year2), service %in% services) %>% 
+    ggplot(aes(x = year, y = value, fill = pop_group)) +
+    geom_col() + 
+    scale_fill_manual(values = c("#1B9E77","#D95F02")) +
+    scale_x_continuous(breaks = c(1900:2200)) +
+    scale_y_continuous(expand = c(0, 0),
+                       labels = scales::label_number()) +
+    # geom_hline(aes(yintercept = mean(value)), linetype = "dotted") + #funktioniert das immer?
+    # geom_text(aes(x = max(year) + 0.5, y = mean(value)),
+    #           label = "MEAN", angle = 90, size = 3.5, color = "#000000") +
+    # facet_wrap(~service) +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1),
+      plot.title = element_text(size = 14))
+}
+
+# test
+plot_pop_overview_absolute(data_socsec_pop, 2010, 2019, c("Total"))
+
+## zooming in
+plot_pop_zoomin <- function(data, year1, year2, services) {
   
   ## data for plot
   list <- list()
   list$data_plot <- data %>% 
-    filter(year %in% years, service %in% services) 
+    filter(year %in% c(year1:year2), service %in% services) 
   
   ## stat for plot
   list$stats_pop <- list$data_plot %>% 
@@ -291,12 +343,15 @@ plot_pop_zooming <- function(data, years, services) {
                        labels = list$data_plot$year,
                        expand = c(0, 0)) +
     
+    scale_x_continuous(labels = scales::label_number()) +
+    
     coord_flip() +
     
     # layout
     theme(axis.ticks.y = element_line(color = "#e3e2e2"),
           axis.ticks.x = element_line(color = "#e3e2e2"),
           axis.line.x = element_blank(),
+          axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1),
           text = element_text(color = "#4a4e4d"),
           strip.text.y.left  = element_text(angle = 0),
           panel.background = element_rect(fill = "white", color = "white"),
@@ -311,14 +366,24 @@ plot_pop_zooming <- function(data, years, services) {
 }
 
 #test
-plot_pop_zooming(data_socsec_pop, 2010:2019, "IV")
+plot_pop_zoomin(data_socsec_pop, 2010, 2019, c("Total"))
 
+## data table
 
+data_data_table_pop <- select(data_socsec_pop, !c("diff_a", "diff_r"))
 
+data_table_pop <- function(year1, year2, services){
+  
+  filter(data_data_table_pop, year %in% c(year1:year2) & service %in% services)
+  
+}
 
+#test 
+data_table_pop(2010, 2019, c("Total"))
 
-# test --------------------------------------------------------------------
+# age --------------------------------------------------------------------
 
+# 1. barplot pro jahr: verhältnis, 2. dito: rato, 3. groupiert
 
 ## plot grouped by age
 
@@ -342,6 +407,7 @@ ggplot(aes(x = year, y = value, fill = age)) +
   facet_wrap(~age) +
   theme_minimal() +
   theme(
+    axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1),
     legend.position="none",
     plot.title = element_text(size = 14))
 

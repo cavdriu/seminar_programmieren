@@ -16,8 +16,8 @@ library(ggplot2)
 
 shinyServer(function(input, output){
     
-    # inputs selection
-    # ...
+# output gender -----------------------------------------------------------
+
     
     output$gender_ratio <- renderPlot({
         
@@ -43,7 +43,7 @@ shinyServer(function(input, output){
     
     output$gender_zoomin <- renderPlot({
         
-        plot_gender_zooming(
+        plot_gender_zoomin(
             data_socsec_gender, 
             input$start,
             input$end,
@@ -52,25 +52,74 @@ shinyServer(function(input, output){
         
     })
     
-    output$dist <- renderPlot({
+    output$gender_table <- renderDataTable({
         
-        hist(
-            rnorm(input$nobs,
-                  mean = input$mean_in,
-                  sd = input$sd_in),
-            main = "",
-            xlab = ""
+        data_table_gender(
+            input$start,
+            input$end,
+            input$service
+            )
+        
+    })
+    
+# output population -------------------------------------------------------
+
+    output$pop_ratio <- renderPlot({
+        
+        plot_pop_overview_ratio(
+            data_socsec_pop, 
+            input$start,
+            input$end,
+            input$service
         )
         
     })
     
-    # output$gender_absolute
-    # 
-    # output$gender_zooming
-    
-    output$tab <- renderDataTable({
-        mtcars
+    output$pop_absolut <- renderPlot({
+        
+        plot_pop_overview_absolute(
+            data_socsec_pop, 
+            input$start,
+            input$end,
+            input$service
+        )
         
     })
     
+    output$pop_zoomin <- renderPlot({
+        
+        plot_pop_zoomin(
+            data_socsec_pop, 
+            input$start,
+            input$end,
+            input$service
+        )
+        
+    })
+    
+    output$pop_table <- renderDataTable({
+        
+        data_table_pop(
+            input$start,
+            input$end,
+            input$service
+        )
+        
+    })
+
+
+# output age --------------------------------------------------------------
+
+    # output$dist <- renderPlot({
+    #     
+    #     hist(
+    #         rnorm(input$nobs,
+    #               mean = input$mean_in,
+    #               sd = input$sd_in),
+    #         main = "",
+    #         xlab = ""
+    #     )
+    #     
+    # })
+
 })
