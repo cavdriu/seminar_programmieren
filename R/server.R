@@ -11,14 +11,12 @@ library(shiny)
 library(dplyr)
 library(ggplot2)
 
-
 # server ------------------------------------------------------------------
 
 shinyServer(function(input, output){
     
 # output gender -----------------------------------------------------------
 
-    
     output$gender_ratio <- renderPlot({
         
         plot_gender_overview_ratio(
@@ -110,6 +108,52 @@ shinyServer(function(input, output){
 
 # output age --------------------------------------------------------------
 
+    output$age_ratio <- renderPlot({
+        
+        plot_age_overview_ratio(
+            data_socsec_age, 
+            input$start,
+            input$end,
+            input$service,
+            input$age
+        )
+        
+    })
+    
+    output$age_absolut <- renderPlot({
+        
+        plot_age_overview_absolute(
+            data_socsec_age, 
+            input$start,
+            input$end,
+            input$service,
+            input$age
+        )
+        
+    })
+    
+    output$age_zoomin <- renderPlot({
+        
+        plot_age_line(
+            data_socsec_age, 
+            input$start,
+            input$end,
+            input$service
+        )
+        
+    })
+    
+    output$age_table <- renderDataTable({
+        
+        data_table_age(
+            input$start,
+            input$end,
+            input$service
+        )
+        
+    })
+    
+    
     # output$dist <- renderPlot({
     #     
     #     hist(

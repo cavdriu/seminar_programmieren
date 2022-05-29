@@ -71,7 +71,7 @@ data_socsec_dodge_bplot %>%
   geom_col(position = "dodge") +
   scale_y_continuous(
     breaks = scales::pretty_breaks(),
-    labels = scales::number
+    labels = scales::label_number()
   ) +
   scale_fill_brewer(palette = "Dark2"#,
                     #limits = c("ALV", "IV", "SH")
@@ -89,11 +89,14 @@ data_socsec_stack_bplot$service <- factor(data_socsec_stack_bplot$service,
 data_socsec_stack_bplot %>% 
 ggplot(aes(x = year, y = value, fill = service)) + 
   geom_col(position = "fill") +
+  scale_y_continuous(labels = scales::percent_format()) +
   scale_fill_brewer(palette = "Dark2"#,
                     #limits = c("ALV", "IV", "SH", "ALV+IV", "ALV+SH", "SH+IV", "ALV+SH+IV")
                     ) +
   theme_minimal() +
-  theme(plot.title = element_text(size=14))
+  theme(
+    axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1),
+    plot.title = element_text(size = 14))
 
 
 

@@ -239,7 +239,6 @@ plot_pop_overview_ratio <- function(data, year1, year2, services) {  #year!!!
     scale_y_continuous(expand = c(0, 0),
                        labels = scales::percent_format()) +
     geom_hline(yintercept = 0.5, linetype = "dotted") +
-    #facet_wrap(~service) +
     theme_minimal() +
     theme(
       axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1),
@@ -259,10 +258,6 @@ plot_pop_overview_absolute <- function(data, year1, year2, services) {
     scale_x_continuous(breaks = c(1900:2200)) +
     scale_y_continuous(expand = c(0, 0),
                        labels = scales::label_number()) +
-    # geom_hline(aes(yintercept = mean(value)), linetype = "dotted") + #funktioniert das immer?
-    # geom_text(aes(x = max(year) + 0.5, y = mean(value)),
-    #           label = "MEAN", angle = 90, size = 3.5, color = "#000000") +
-    # facet_wrap(~service) +
     theme_minimal() +
     theme(
       axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1),
@@ -383,43 +378,89 @@ data_table_pop(2010, 2019, c("Total"))
 
 # age --------------------------------------------------------------------
 
-# 1. barplot pro jahr: verhältnis, 2. dito: rato, 3. groupiert
+age_groups <- c("18-24", "25-39", "40-54", "55-65")
+
+## overview ratio
+plot_age_overview_ratio <- function(data, year1, year2, services, age_group = age_groups) {  
+  data %>% 
+    filter(year %in% c(year1:year2), service %in% services, 
+           age != "Total", age %in% age_group) %>% 
+    ggplot(aes(x = year, y = value, fill = age)) +
+    geom_col(position = "fill") +
+    scale_fill_brewer(palette = "Dark2") +
+    scale_x_continuous(breaks = c(1900:2200)) +
+    scale_y_continuous(expand = c(0, 0),
+                       labels = scales::percent_format()) +
+    geom_hline(yintercept = 0.5, linetype = "dotted") +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1),
+      plot.title = element_text(size = 14))
+}
+
+# test
+plot_age_overview_ratio(data_socsec_age, 2010, 2019, c("ALV"), c("18-24"))
+
+## overview absolute
+plot_age_overview_absolute <- function(data, year1, year2, services, age_group = age_groups) {
+  data %>% 
+    filter(year %in% c(year1:year2), service %in% services, 
+           age != "Total", age %in% age_group) %>% 
+    ggplot(aes(x = year, y = value, fill = age)) +
+    geom_col() + 
+    scale_fill_brewer(palette = "Dark2") +
+    scale_x_continuous(breaks = c(1900:2200)) +
+    scale_y_continuous(expand = c(0, 0),
+                       labels = scales::label_number()) +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1),
+      plot.title = element_text(size = 14))
+}
+
+# test
+plot_age_overview_absolute(data_socsec_age, 2010, 2019, c("ALV"))
 
 ## plot grouped by age
 
-###wieso geht factor / as.character nicht?###
-data_socsec_age %>%
-  filter(age != "Total" & service != "Total", service == "ALV") %>% # service anpassen
-  mutate(age = paste0("Age: ", .$age)) %>% 
-ggplot(aes(x = year, y = value, fill = age)) +
-  geom_area(aes(x = year, y = value_total), fill = "grey",  alpha = 0.8, color = "grey") + 
-  geom_area() +
-  geom_line(color = "black") +
-  scale_fill_brewer(palette = "Dark2") +
-  scale_y_continuous(
-    breaks = scales::pretty_breaks(),
-    labels = scales::number,
-    expand = c(0, 0)
-  ) +
-  scale_x_continuous(
-    breaks = c(1900:2200)
-  ) +
-  facet_wrap(~age) +
-  theme_minimal() +
-  theme(
-    axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1),
-    legend.position="none",
-    plot.title = element_text(size = 14))
+plot_age_line <- function(data, year1, year2, services) { # age?
+  
+  data %>% 
+    filter(year %in% c(year1:year2), service %in% services, age != "Total") %>%
+    mutate(age = paste0("Age: ", .$age)) %>% 
+  ggplot(aes(x = year, y = value, fill = age)) +
+    geom_area(aes(x = year, y = value_total), fill = "grey",  alpha = 0.8, color = "grey") + 
+    geom_area() +
+    geom_line(color = "black") +
+    scale_fill_brewer(palette = "Dark2") +
+    scale_y_continuous(
+      breaks = scales::pretty_breaks(),
+      labels = scales::number,
+      expand = c(0, 0)
+      ) +
+    scale_x_continuous(breaks = c(1900:2200)) +
+    facet_wrap(~age) +
+    theme_minimal() +
+    theme(
+      axis.text.x = element_text(angle = 30, hjust = 1, vjust = 1),
+      legend.position= "none",
+      plot.title = element_text(size = 14)
+      )
+}
 
-# # vergleich zu stacked
-# data_socsec_age %>%
-#   filter(age != "Total" & service != "Total", service == "ALV") %>%
-#   ggplot(aes(x = as.numeric(year), y = value, fill = age)) +
-#   geom_area() +
-#   scale_fill_brewer(palette = "Dark2") +
-#   theme_minimal() +
-#   theme(
-#     legend.position="none",
-#     plot.title = element_text(size = 14))
+# test
+plot_age_line(data_socsec_age, 2010, 2019, c("ALV"))
+
+## data table
+
+data_table_age <- function(year1, year2, services){
+  
+  filter(data_socsec_age, year %in% c(year1:year2) & service %in% services, age != "Total")
+  
+}
+
+#test 
+data_table_age(2010, 2019, c("Total"))
+
 
 

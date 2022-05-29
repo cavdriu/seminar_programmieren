@@ -10,7 +10,6 @@
 library(shiny)
 library(shinydashboard)
 
-
 # ui ----------------------------------------------------------------------
 
 header <- dashboardHeader(title = "Sozialversicherungen Schweiz")
@@ -18,6 +17,7 @@ header <- dashboardHeader(title = "Sozialversicherungen Schweiz")
 # inputs (im server integrieren?)
 service <- c("Total", "ALV", "IV", "SH")
 gender <- c("f", "m")
+age <- c("18-24", "25-39", "40-54", "55-65")
 
 sidebar <- dashboardSidebar(
         
@@ -33,8 +33,11 @@ sidebar <- dashboardSidebar(
             selectInput("service", "Auwahl der Sozialversicherung", service),
             numericInput("start", "Von", value = 2010, min = 2010, max = 2019),
             numericInput("end", "Bis", value = 2019, min = 2010, max = 2019)
+            
             )
         )
+
+# overview ----------------------------------------------------------------
 
 body <- dashboardBody(
         
@@ -109,9 +112,7 @@ body <- dashboardBody(
 tabItem(tabName = "pop",
         
         h2("Sozialversicherungen nach Bevölkerungsgruppe"),
-        h5("Achtung! Die Zahlen sind nicht im Verhältnis zur Gesamtenbevölkeungsgruppe.
-           Es ist lediglich die Verteilung innerhalb des Sample."),    # text für sidebar???
-        
+
         fluidPage(
                 
                 fluidRow(
@@ -138,15 +139,49 @@ tabItem(tabName = "pop",
                         
                 )
         )
-)
+),
 
 # age -------------------------------------------------------------------------
 
+tabItem(tabName = "age",
+        
+        h2("Sozialversicherungen nach Altersgruppe"),
+        
+        fluidPage(
+                
+                fluidRow(
+                        
+                        box(checkboxGroupInput("age", "Altersgruppe", age),
+                            width = 1),
+                        
+                        box(title = "Überblick Verhältniss",
+                            plotOutput("age_ratio"),
+                            width = 3),
+                        
+                        box(title = "Überblick Absolut",
+                            plotOutput("age_absolut"),
+                            width = 3),
+                        
+                        box(title = "Zoom-In",
+                            plotOutput("age_zoomin"),
+                            width = 5),
+                        
+                ),
+                
+                fluidRow(
 
+                        box(title = "Daten",
+                            dataTableOutput("age_table"),
+                            width = 12)
+                        
+                )
 
-            )
         )
+)
+
+))
 
 
+# run app ---------------------------------------------------------------------
 
 dashboardPage(header, sidebar, body)
